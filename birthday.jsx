@@ -1,6 +1,35 @@
 import { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 
+// Inject GlitterWord styles once at module load — not inside the component
+if (typeof document !== "undefined") {
+  const id = "glitter-styles";
+  if (!document.getElementById(id)) {
+    const s = document.createElement("style");
+    s.id = id;
+    s.textContent = `
+      @keyframes glitter {
+        0%,100%{background-position:0% 50%;filter:brightness(1) drop-shadow(0 0 8px #ff69b4);}
+        50%{background-position:100% 50%;filter:brightness(2.2) drop-shadow(0 0 28px #fff);}
+      }
+      .g-word {
+        font-family:'Pinyon Script',cursive;
+        background:linear-gradient(90deg,#ff69b4,#ff1493,#fff,#ffb6c1,#ff69b4,#ff1493,#fff);
+        background-size:400% 400%;
+        -webkit-background-clip:text;
+        -webkit-text-fill-color:transparent;
+        background-clip:text;
+        animation:glitter 2s ease infinite;
+        display:inline-block;
+        line-height:2;
+        padding-block:0.25em;
+        padding-inline:0.35em;
+      }
+    `;
+    document.head.appendChild(s);
+  }
+}
+
 const ALL_PHOTOS = [
   "/assets/img1.jpeg",
   "/assets/img2.jpeg",
@@ -17,7 +46,7 @@ const BOOK_SPREADS = [
   { left: "/assets/img1.jpeg", right: "/assets/img2.jpeg", caption: "As long as you're smiling, I'm happy 💕" },
   // { left: "/assets/img3.jpeg", right: "/assets/img4.jpeg", caption: "Walking tall, standing proud 🌺" },
   // { left: "/assets/img5.jpeg", right: "/assets/img6.jpeg", caption: "Those eyes tell a thousand stories 💫" },
-  { left: "/assets/img7.jpeg", right: "/assets/img8.jpeg", caption: "Happy Birthday Oyin — here's to you ❤️" },
+  { left: "/assets/img3.jpeg", right: "/assets/img6.jpeg", caption: "Happy Birthday Oyin — here's to you ❤️" },
 ];
 
 function heartPoint(t) {
@@ -119,28 +148,7 @@ function Countdown({ onDone }) {
 
 // ── Glitter word ─────────────────────────────────────
 function GlitterWord({ children, fontSize = "5rem" }) {
-  return (
-    <>
-      <style>{`
-        @keyframes glitter {
-          0%,100%{background-position:0% 50%;filter:brightness(1) drop-shadow(0 0 8px #ff69b4);}
-          50%{background-position:100% 50%;filter:brightness(2.2) drop-shadow(0 0 28px #fff);}
-        }
-        .g-word {
-          font-family:'Pinyon Script',cursive;
-          background:linear-gradient(90deg,#ff69b4,#ff1493,#fff,#ffb6c1,#ff69b4,#ff1493,#fff);
-          background-size:400% 400%;
-          -webkit-background-clip:text;
-          -webkit-text-fill-color:transparent;
-          background-clip:text;
-          animation:glitter 2s ease infinite;
-          display:inline-block;
-          line-height:1.1;
-        }
-      `}</style>
-      <span className="g-word" style={{ fontSize }}>{children}</span>
-    </>
-  );
+  return <span className="g-word" style={{ fontSize }}>{children}</span>;
 }
 
 
@@ -284,8 +292,14 @@ function SequentialReveal({ onDone }) {
 
       <div className="flex gap-2 mt-8">
         {REVEAL_ITEMS.map((_, i) => (
-          <div key={i} className="w-1.5 h-1.5 rounded-full transition-all duration-300"
-            style={{ background: i <= step ? "#ff69b4" : "rgba(255,255,255,0.15)" }} />
+          <div key={i} className="rounded-full transition-all duration-300"
+            style={{
+              width: i === step ? 8 : 6,
+              height: i === step ? 8 : 6,
+              background: i <= step ? "#ff69b4" : "rgba(255,255,255,0.15)",
+              boxShadow: i === step ? "0 0 8px 2px #ff69b4" : "none",
+              transform: i === step ? "scale(1.4)" : "scale(1)",
+            }} />
         ))}
       </div>
     </div>
@@ -341,8 +355,9 @@ function BookScene({ onDone }) {
     }
   };
 
+  const bookH = Math.min(500, Math.floor(window.innerHeight * 0.62));
   const S = { // shared inline-style helpers
-    page: { flex:1, overflow:"hidden", position:"relative" },
+    page: { flex:1, overflow:"hidden", position:"relative", background:"linear-gradient(135deg,#1a000e,#3a0018)" },
     inShadowR: { position:"absolute",right:0,top:0,bottom:0,width:20,background:"linear-gradient(to left,rgba(0,0,0,0.22),transparent)",pointerEvents:"none" },
     inShadowL: { position:"absolute",left:0,top:0,bottom:0,width:20,background:"linear-gradient(to right,rgba(0,0,0,0.22),transparent)",pointerEvents:"none" },
     pageNum: { position:"absolute",bottom:8,left:0,right:0,textAlign:"center",color:"rgba(255,255,255,0.45)",fontSize:10,fontFamily:"monospace" },
@@ -359,7 +374,7 @@ function BookScene({ onDone }) {
       </div>
 
       {/* Book container */}
-      <div onClick={handleTap} style={{ cursor:"pointer",perspective:"1600px",width: bookOpen ? Math.min(window.innerWidth*0.94, 560) : 240,height:500,transition:"width 0.55s cubic-bezier(0.22,1,0.36,1)",position:"relative" }}>
+      <div onClick={handleTap} style={{ cursor:"pointer",perspective:"1600px",width: bookOpen ? Math.min(window.innerWidth*0.94, 560) : 240,height:bookH,transition:"width 0.55s cubic-bezier(0.22,1,0.36,1)",position:"relative" }}>
 
         {!bookOpen ? (
           /* ── CLOSED 📕 ── */
@@ -382,8 +397,6 @@ function BookScene({ onDone }) {
                 <div style={{width:40,height:1,background:"rgba(255,182,193,0.4)",margin:"2px 0"}}/>
                 <p style={{fontFamily:"Georgia,serif",color:"rgba(255,182,193,0.55)",fontSize:11,letterSpacing:"0.18em",textTransform:"uppercase"}}>with love</p>
               </div>
-              {/* Tap hint */}
-              <div style={{position:"absolute",bottom:16,left:0,right:0,textAlign:"center",color:"rgba(255,255,255,0.3)",fontSize:9,letterSpacing:"0.18em",textTransform:"uppercase"}}>tap to open</div>
             </div>
           </div>
         ) : (
@@ -398,7 +411,7 @@ function BookScene({ onDone }) {
               animate={{ rotateY: 0 }}
               transition={{ duration:0.3, ease:"easeOut" }}
             >
-              <img src={leftSrc} style={{width:"100%",height:"100%",objectFit:"cover"}} alt="left"/>
+              <img src={leftSrc} decoding="sync" style={{width:"100%",height:"100%",objectFit:"cover",display:"block"}} alt="left"/>
               <div style={S.inShadowR}/>
               <div style={S.pageNum}>{spreadIdx * 2 + 1}</div>
             </motion.div>
@@ -415,7 +428,7 @@ function BookScene({ onDone }) {
               transition={{ duration:0.3, ease: flipPhase==="out"?"easeIn":"easeOut" }}
               onAnimationComplete={handleAnimComplete}
             >
-              <img src={rightSrc} style={{width:"100%",height:"100%",objectFit:"cover",display:"block"}} alt="right"/>
+              <img src={rightSrc} decoding="sync" style={{width:"100%",height:"100%",objectFit:"cover",display:"block"}} alt="right"/>
               <div style={{position:"absolute",inset:0,background:"linear-gradient(135deg,rgba(255,255,255,0.14) 0%,transparent 55%,rgba(0,0,0,0.18) 100%)",pointerEvents:"none"}}/>
               <div style={S.inShadowL}/>
               <div style={S.pageNum}>{spreadIdx * 2 + 2} / {total * 2}</div>
@@ -514,11 +527,12 @@ function HeartCollage() {
 export default function AnitaBirthday() {
   const [phase, setPhase] = useState("countdown");
 
-  // Preload all images immediately so they're in cache when the book opens
+  // Preload + GPU-decode all images immediately so the book never flashes blank
   useEffect(() => {
     ALL_PHOTOS.forEach((src) => {
       const img = new Image();
       img.src = src;
+      img.decode().catch(() => {}); // forces decode into GPU memory, not just download
     });
   }, []);
 
