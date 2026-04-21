@@ -122,7 +122,6 @@ function GlitterWord({ children, fontSize = "5rem" }) {
   return (
     <>
       <style>{`
-        @import url('https://fonts.googleapis.com/css2?family=Pinyon+Script&display=swap');
         @keyframes glitter {
           0%,100%{background-position:0% 50%;filter:brightness(1) drop-shadow(0 0 8px #ff69b4);}
           50%{background-position:100% 50%;filter:brightness(2.2) drop-shadow(0 0 28px #fff);}
@@ -190,11 +189,21 @@ const KITTY_SHOW_MS = 2400;
 function SequentialReveal({ onDone }) {
   const [step, setStep] = useState(-1);
   const [exiting, setExiting] = useState(false);
+  const [fontReady, setFontReady] = useState(false);
+
+  // Wait until Pinyon Script is confirmed loaded before starting
+  useEffect(() => {
+    document.fonts
+      .load('1em "Pinyon Script"')
+      .then(() => setFontReady(true))
+      .catch(() => setFontReady(true)); // start anyway if font API fails
+  }, []);
 
   useEffect(() => {
+    if (!fontReady) return;
     const t = setTimeout(() => setStep(0), 300);
     return () => clearTimeout(t);
-  }, []);
+  }, [fontReady]);
 
   useEffect(() => {
     if (step < 0) return;
@@ -504,6 +513,14 @@ function HeartCollage() {
 
 export default function AnitaBirthday() {
   const [phase, setPhase] = useState("countdown");
+
+  // Preload all images immediately so they're in cache when the book opens
+  useEffect(() => {
+    ALL_PHOTOS.forEach((src) => {
+      const img = new Image();
+      img.src = src;
+    });
+  }, []);
 
   return (
     <div className="relative min-h-screen w-full overflow-hidden flex items-center justify-center"
