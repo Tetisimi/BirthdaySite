@@ -235,9 +235,9 @@ function SequentialReveal({ onDone }) {
           >
             {item.type === "word" && (
               <GlitterWord fontSize={
-                item.text === "Birthday" || item.text === "Oyindamola" ? "7rem"
-                : item.text === "to" ? "5.5rem"
-                : "6rem"
+                item.text === "Birthday" || item.text === "Oyindamola" ? "clamp(3rem, 16vw, 7rem)"
+                : item.text === "to" ? "clamp(2.5rem, 13vw, 5.5rem)"
+                : "clamp(2.8rem, 14vw, 6rem)"
               }>
                 {item.text}
               </GlitterWord>
@@ -432,9 +432,10 @@ function BookScene({ onDone }) {
 
 // ── Heart Collage (photos + emoji hearts) ────────────
 function HeartCollage() {
-  const vw = Math.min(typeof window !== "undefined" ? window.innerWidth : 400, 480);
-  const size = 96;
-  const area = Math.min(vw * 1.15, 520);
+  const vw = typeof window !== "undefined" ? window.innerWidth : 400;
+  const maxArea = Math.min(vw - 24, 480);
+  const area = maxArea;
+  const size = Math.min(96, Math.floor(area * 0.19));
 
   return (
     <div className="flex flex-col items-center gap-4 w-full">
