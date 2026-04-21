@@ -15,8 +15,8 @@ const ALL_PHOTOS = [
 // Each entry is a full two-page spread shown together
 const BOOK_SPREADS = [
   { left: "/assets/img1.jpeg", right: "/assets/img2.jpeg", caption: "As long as you're smiling, I'm happy 💕" },
-  { left: "/assets/img3.jpeg", right: "/assets/img4.jpeg", caption: "Walking tall, standing proud 🌺" },
-  { left: "/assets/img5.jpeg", right: "/assets/img6.jpeg", caption: "Those eyes tell a thousand stories 💫" },
+  // { left: "/assets/img3.jpeg", right: "/assets/img4.jpeg", caption: "Walking tall, standing proud 🌺" },
+  // { left: "/assets/img5.jpeg", right: "/assets/img6.jpeg", caption: "Those eyes tell a thousand stories 💫" },
   { left: "/assets/img7.jpeg", right: "/assets/img8.jpeg", caption: "Happy Birthday Oyin — here's to you ❤️" },
 ];
 
